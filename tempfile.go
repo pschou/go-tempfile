@@ -1,10 +1,8 @@
 package tempfile
 
 import (
-	"log"
 	"math/rand"
 	"os"
-	"os/signal"
 	"path"
 	"sync"
 )
@@ -12,19 +10,10 @@ import (
 // The purpose of this package is to provide temp files and then clean them up
 // when a signal terminate is received.
 
-func init() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for sig := range c {
-			if Debug {
-				log.Println("Caught signal", sig)
-			}
-			for file, _ := range tmpFile {
-				os.Remove(file)
-			}
-		}
-	}()
+func Cleanup() {
+	for file, _ := range tmpFile {
+		os.Remove(file)
+	}
 }
 
 var (

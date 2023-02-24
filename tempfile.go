@@ -1,6 +1,7 @@
 package tempfile
 
 import (
+	"log"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -16,6 +17,9 @@ func init() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for sig := range c {
+			if Debug {
+				log.Println("Caught signal", sig)
+			}
 			for file, _ := range tmpFile {
 				os.Remove(file)
 			}
@@ -30,6 +34,8 @@ var (
 	// Prefix to add to the temp file names
 	Prefix = "tmp-"
 
+	// Toggle debug
+	Debug        = false
 	tmpFile      = make(map[string]struct{})
 	tmpFileMutex sync.Mutex
 )
@@ -49,7 +55,7 @@ func New() string {
 	tmpFileMutex.Lock()
 	defer tmpFileMutex.Unlock()
 	for {
-		test := path.Join(TempFolder, Prefix+randStringBytes(8))
+		test := path.Join(Folder, Prefix+randStringBytes(8))
 		if _, ok := tmpFile[test]; !ok {
 			tmpFile[test] = struct{}{}
 			return test
